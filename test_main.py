@@ -13,6 +13,39 @@ def test_crear_y_listar():
     lista = cliente.get("/tareas").json()
     assert tarea in lista
 
+def test_filtrar_tareas_hechas():
+    pendiente = cliente.post("/tareas", json={"titulo": "Tarea pendiente"}).json()
+    hecha = cliente.post("/tareas", json={"titulo": "Tarea hecha"}).json()
+    cliente.patch(f"/tareas/{hecha['id']}")
+
+    respuesta = cliente.get("/tareas", params={"hecha": True})
+
+    assert respuesta.status_code == 200
+    tareas_hechas = respuesta.json()
+    ids_hechas = [tarea["id"] for tarea in tareas_hechas]
+    assert hecha["id"] in ids_hechas
+    assert pendiente["id"] not in ids_hechas
+    assert all(tarea["hecha"] is True for tarea in tareas_hechas)
+
+def test_filtrar_tareas_pendientes():
+    pendiente = cliente.post("/tareas", json={"titulo": "Otra pendiente"}).json()
+    hecha = cliente.post("/tareas", json={"titulo": "Otra hecha"}).json()
+    cliente.patch(f"/tareas/{hecha['id']}")
+
+    respuesta = cliente.get("/tareas", params={"hecha": False})
+
+    assert respuesta.status_code == 200
+    tareas_pendientes = respuesta.json()
+    ids_pendientes = [tarea["id"] for tarea in tareas_pendientes]
+    assert pendiente["id"] in ids_pendientes
+    assert hecha["id"] not in ids_pendientes
+    assert all(tarea["hecha"] is False for tarea in tareas_pendientes)
+
+def test_filtrar_tareas_con_estado_invalido_devuelve_422():
+    respuesta = cliente.get("/tareas", params={"hecha": "invalido"})
+
+    assert respuesta.status_code == 422
+
 def test_obtener_tarea_existente():
     creada = cliente.post("/tareas", json={"titulo": "Practicar pruebas"})
     id_tarea = creada.json()["id"]

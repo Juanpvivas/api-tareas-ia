@@ -14,8 +14,13 @@ tareas: dict[int, Tarea] = {}
 siguiente_id = 1
 
 @app.get("/tareas")
-def listar() -> list[Tarea]:
-    return list(tareas.values())
+def listar(hecha: bool | None = None) -> list[Tarea]:
+    tareas_listadas = list(tareas.values())
+    if hecha is not None:
+        tareas_listadas = [
+            tarea for tarea in tareas_listadas if tarea.hecha == hecha
+        ]
+    return tareas_listadas
 
 @app.get("/tareas/{id}")
 def obtener(id: int) -> Tarea:
