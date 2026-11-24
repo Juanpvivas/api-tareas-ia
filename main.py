@@ -23,6 +23,13 @@ def obtener(id: int) -> Tarea:
         raise HTTPException(status_code=404, detail="Tarea no encontrada")
     return tareas[id]
 
+@app.patch("/tareas/{id}")
+def marcar_como_hecha(id: int) -> Tarea:
+    if id not in tareas:
+        raise HTTPException(status_code=404, detail="Tarea no encontrada")
+    tareas[id].hecha = True
+    return tareas[id]
+
 @app.post("/tareas", status_code=201)
 def crear(datos: TareaNueva) -> Tarea:
     global siguiente_id

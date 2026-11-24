@@ -31,3 +31,23 @@ def test_obtener_tarea_inexistente_devuelve_404():
     respuesta = cliente.get(f"/tareas/{id_inexistente}")
 
     assert respuesta.status_code == 404
+
+def test_marcar_tarea_como_hecha():
+    creada = cliente.post("/tareas", json={"titulo": "Completar ejercicio"})
+    id_tarea = creada.json()["id"]
+
+    respuesta = cliente.patch(f"/tareas/{id_tarea}")
+
+    assert respuesta.status_code == 200
+    assert respuesta.json()["hecha"] is True
+    assert cliente.get(f"/tareas/{id_tarea}").json()["hecha"] is True
+
+def test_marcar_tarea_inexistente_devuelve_404():
+    ids_existentes = [
+        tarea["id"] for tarea in cliente.get("/tareas").json()
+    ]
+    id_inexistente = max(ids_existentes, default=0) + 1
+
+    respuesta = cliente.patch(f"/tareas/{id_inexistente}")
+
+    assert respuesta.status_code == 404
