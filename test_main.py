@@ -51,3 +51,22 @@ def test_marcar_tarea_inexistente_devuelve_404():
     respuesta = cliente.patch(f"/tareas/{id_inexistente}")
 
     assert respuesta.status_code == 404
+
+def test_eliminar_tarea_existente():
+    creada = cliente.post("/tareas", json={"titulo": "Eliminar tarea"})
+    id_tarea = creada.json()["id"]
+
+    respuesta = cliente.delete(f"/tareas/{id_tarea}")
+
+    assert respuesta.status_code == 204
+    assert cliente.get(f"/tareas/{id_tarea}").status_code == 404
+
+def test_eliminar_tarea_inexistente_devuelve_404():
+    ids_existentes = [
+        tarea["id"] for tarea in cliente.get("/tareas").json()
+    ]
+    id_inexistente = max(ids_existentes, default=0) + 1
+
+    respuesta = cliente.delete(f"/tareas/{id_inexistente}")
+
+    assert respuesta.status_code == 404

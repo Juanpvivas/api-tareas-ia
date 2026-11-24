@@ -30,6 +30,12 @@ def marcar_como_hecha(id: int) -> Tarea:
     tareas[id].hecha = True
     return tareas[id]
 
+@app.delete("/tareas/{id}", status_code=204)
+def eliminar(id: int) -> None:
+    if id not in tareas:
+        raise HTTPException(status_code=404, detail="Tarea no encontrada")
+    del tareas[id]
+
 @app.post("/tareas", status_code=201)
 def crear(datos: TareaNueva) -> Tarea:
     global siguiente_id
